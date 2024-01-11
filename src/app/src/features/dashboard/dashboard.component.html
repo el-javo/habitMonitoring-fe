@@ -1,2 +1,9 @@
-<p>dashboard works!</p>
-<p-button label="botoncico"></p-button>
+<div class="faher-container">
+  <div class="nav-bar">
+    <h1>Habits Monitoring</h1>
+    <div class="user-dropdown">
+      <p-dropdown [options]="users" optionLabel="name"></p-dropdown>
+    </div>
+  </div>
+  <router-outlet></router-outlet>
+</div>
