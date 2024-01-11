@@ -2,7 +2,13 @@
   <div class="nav-bar">
     <h1>Habits Monitoring</h1>
     <div class="user-dropdown">
-      <p-dropdown [options]="users" optionLabel="name"></p-dropdown>
+      <p-dropdown
+        [options]="users"
+        optionLabel="username"
+        [(ngModel)]="selectedUser"
+        placeholder="Selecciona un usuario"
+        (onClick)="check()"
+      ></p-dropdown>
     </div>
   </div>
   <router-outlet></router-outlet>

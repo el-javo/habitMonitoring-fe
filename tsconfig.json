@@ -5,7 +5,10 @@
     "outDir": "./dist/out-tsc",
     "paths": {
       "@shared/*": ["./src/app/src/shared/*"],
-      "@features/*": ["./src/app/src/features/*"]
+      "@features/*": ["./src/app/src/features/*"],
+      "@environments/*": ["./src/environments/*"],
+      "@assets/*": ["./src/assets/*"],
+      "@core/*": ["./src/app/core/*"]
     },
     "forceConsistentCasingInFileNames": true,
     "strict": true,

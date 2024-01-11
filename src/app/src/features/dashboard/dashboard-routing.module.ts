@@ -7,6 +7,20 @@ export const routes: Routes = [
   {
     path: '',
     component: DashboardComponent,
+    // children: [
+    //   { path: '', pathMatch: 'full', redirectTo: 'todayHabits' },
+    //   {
+    //     path: 'todayHabits',
+    //     loadChildren: () =>
+    //       import(
+    //         '@features/dashboard/views/todayHabits/todayHabits.module'
+    //       ).then((m) => m.todayHabitsModule),
+    //   },
+    //   {
+    //     path: '**',
+    //     redirectTo: 'dashboard',
+    //   },
+    // ],
   },
   {
     path: '**',
