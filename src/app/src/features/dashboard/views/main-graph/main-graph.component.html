@@ -1,2 +1,15 @@
 <h2>Main Graph</h2>
 <p>Total Habit Registries: {{ habitRegistries?.length || "sin registros" }}</p>
+<apx-chart
+  #apexChart
+  [series]="chartOptions.series!"
+  [chart]="chartOptions.chart!"
+  [dataLabels]="chartOptions.dataLabels!"
+  [markers]="chartOptions.markers!"
+  [title]="chartOptions.title!"
+  [tooltip]="chartOptions.tooltip!"
+  [theme]="chartOptions.theme!"
+  [xaxis]="chartOptions.xaxis!"
+  [stroke]="chartOptions.stroke!"
+  [yaxis]="chartOptions.yaxis!"
+></apx-chart>
