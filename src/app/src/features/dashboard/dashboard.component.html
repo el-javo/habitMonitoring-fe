@@ -1,13 +1,18 @@
 <div class="faher-container">
   <div class="nav-bar">
     <h1>Habits Monitoring</h1>
+    <div class="nav-buttons">
+      <p-button label="Gaph" (click)="navigate('mainGraph')"></p-button>
+      <p-button label="Today" (click)="navigate('todayHabits')"></p-button>
+      <p-button label="Historic" (click)="navigate('historic')"></p-button>
+    </div>
     <div class="user-dropdown">
       <p-dropdown
         [options]="users"
         optionLabel="username"
         [(ngModel)]="selectedUser"
+        (onChange)="updateSelectedUser()"
         placeholder="Selecciona un usuario"
-        (onClick)="check()"
       ></p-dropdown>
     </div>
   </div>

@@ -7,20 +7,34 @@ export const routes: Routes = [
   {
     path: '',
     component: DashboardComponent,
-    // children: [
-    //   { path: '', pathMatch: 'full', redirectTo: 'todayHabits' },
-    //   {
-    //     path: 'todayHabits',
-    //     loadChildren: () =>
-    //       import(
-    //         '@features/dashboard/views/todayHabits/todayHabits.module'
-    //       ).then((m) => m.todayHabitsModule),
-    //   },
-    //   {
-    //     path: '**',
-    //     redirectTo: 'dashboard',
-    //   },
-    // ],
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'mainGraph' },
+      {
+        path: 'mainGraph',
+        loadChildren: () =>
+          import('@features/dashboard/views/main-graph/main-graph.module').then(
+            (m) => m.MainGraphModule
+          ),
+      },
+      {
+        path: 'todayHabits',
+        loadChildren: () =>
+          import(
+            '@features/dashboard/views/today-habits/today-habits.module'
+          ).then((m) => m.TodayHabitsModule),
+      },
+      {
+        path: 'historic',
+        loadChildren: () =>
+          import('@features/dashboard/views/historic/historic.module').then(
+            (m) => m.HistoricModule
+          ),
+      },
+      {
+        path: '**',
+        redirectTo: 'dashboard',
+      },
+    ],
   },
   {
     path: '**',
