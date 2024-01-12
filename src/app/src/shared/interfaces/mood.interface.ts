@@ -7,7 +7,7 @@ export interface IMoodRegistry {
 
 export interface IMoodRegistryBody {
   userId: number;
-  date: Date;
+  date: string;
   value: number;
   observations: string;
 }

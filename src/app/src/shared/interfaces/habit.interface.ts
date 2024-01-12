@@ -22,6 +22,6 @@ export interface IHabitRegistry {
 
 export interface IHabitRegistryBody {
   habitId: number;
-  date: Date;
+  date: string;
   value: number;
 }

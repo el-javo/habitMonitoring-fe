@@ -1,0 +1,55 @@
+.global-cont {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  .habitRegistry {
+    margin: 3rem;
+    background-color: rgb(36, 36, 36);
+    padding: 2rem;
+    border-radius: 15px;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    .date {
+      font-size: 20px;
+      padding: 1rem;
+    }
+    .slider {
+      width: 100px;
+      p {
+        text-align: center;
+        margin: 0;
+        padding-bottom: 5px;
+      }
+    }
+    .habit {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      padding: 5px 0;
+    }
+    .value {
+      display: flex;
+      justify-content: center;
+      width: 50%;
+    }
+    .name {
+      display: flex;
+      width: 50%;
+    }
+    .mood {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .button {
+      display: flex;
+      padding-top: 2rem;
+      justify-content: center;
+    }
+  }
+}
