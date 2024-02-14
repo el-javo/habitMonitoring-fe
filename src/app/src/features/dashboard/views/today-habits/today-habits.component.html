@@ -1,13 +1,26 @@
 <div class="global-cont">
+  <div class="dateSelector">
+    <p-button label="previous" (click)="addDaysToSelectedDate(-1)"></p-button>
+    <p-calendar
+      [maxDate]="maxDate"
+      [(ngModel)]="selectedDate"
+      (ngModelChange)="this.updateRegistryData()"
+    >
+    </p-calendar>
+    <p-button label="next" (click)="addDaysToSelectedDate(1)"></p-button>
+  </div>
   <div class="habitRegistry">
-    <div class="date">{{ todayDate }}</div>
+    <div class="date">
+      {{ selectedDate | date : "dd/MM/yyyy" }}
+      <div [ngClass]="alreadyCreated ? 'green-dot' : 'yellow-dot'"></div>
+    </div>
     @if (habits?.length) { @for (habit of habits; track $index) {
     <div class="habit">
       <div class="name">{{ habit.name }}</div>
       @if (habit.isBoolean) {
       <div class="value">
         <p-inputSwitch
-          [(ngModel)]="habitRegistryMap.get(habit.id)!.value"
+          [(ngModel)]="!!habitRegistryMap.get(habit.id)!.value"
         ></p-inputSwitch>
       </div>
       }@else {
@@ -36,9 +49,19 @@
             [max]="1"
             [min]="0"
             [(ngModel)]="moodRegistry.value"
+            [disabled]="alreadyCreated"
           ></p-slider>
         </div>
       </div>
+    </div>
+    <div class="observations">
+      <div class="name">Observations</div>
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="moodRegistry.observations"
+        [disabled]="alreadyCreated"
+      />
     </div>
     <div class="button">
       <p-button [label]="'save'" (onClick)="createHabitRegistry()"></p-button>

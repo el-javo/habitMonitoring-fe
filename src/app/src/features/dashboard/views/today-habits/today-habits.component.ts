@@ -11,7 +11,7 @@ import {
 } from '@shared/interfaces/mood.interface';
 import { HabitRegistryService } from '@shared/services/habitRegistry.service';
 import { MoodRegistryService } from '@shared/services/moodRegistry.service';
-import { format, isSameDay } from 'date-fns';
+import { addDays, format, isSameDay } from 'date-fns';
 
 @Component({
   selector: 'app-today-habits',
@@ -22,8 +22,9 @@ export class TodayHabitsComponent implements OnInit {
   habits!: IHabit[];
   habitRegistryMap: Map<number, IHabitRegistryBody> = new Map();
   moodRegistry!: IMoodRegistryBody;
-  todayDate = format(new Date(), 'dd/MM/yyyy');
+  maxDate = new Date();
   alreadyCreated = false;
+  selectedDate = new Date();
 
   constructor(
     private _dashboardStore: DashboardStore,
@@ -33,15 +34,38 @@ export class TodayHabitsComponent implements OnInit {
   ngOnInit(): void {
     this.setupSubscriptions();
   }
+  createOrUpdateRegistry() {
+    if (this.alreadyCreated) this.createHabitRegistry();
+    else this.updateHabitRegistry();
+  }
 
-  createHabitRegistry() {
-    [...this.habitRegistryMap.values()].forEach((hr) => {
-      this._habitRegistryService.createHabitRegistry(hr).subscribe({
-        next: (res) => {
-          this.alreadyCreated = true;
-        },
+  updateHabitRegistry() {
+    [...this.habitRegistryMap.values()]
+      .map((hr) => {
+        return { ...hr, value: Number(hr.value) };
+      })
+      .forEach((hr) => {
+        this._habitRegistryService
+          .updateHabitRegistry(String(hr.habitId), hr)
+          .subscribe({
+            next: (res) => {
+              this.alreadyCreated = true;
+            },
+          });
       });
-    });
+  }
+  createHabitRegistry() {
+    [...this.habitRegistryMap.values()]
+      .map((hr) => {
+        return { ...hr, value: Number(hr.value) };
+      })
+      .forEach((hr) => {
+        this._habitRegistryService.createHabitRegistry(hr).subscribe({
+          next: (res) => {
+            this.alreadyCreated = true;
+          },
+        });
+      });
     this._moodRegistryService.createMoodRegistry(this.moodRegistry).subscribe({
       next: (res) => {
         this.alreadyCreated = true;
@@ -55,7 +79,7 @@ export class TodayHabitsComponent implements OnInit {
       this.habitRegistryMap.set(h.id, {
         habitId: h.id,
         date: format(new Date(), 'MM-dd-yyyy'),
-        value: registries?.length
+        value: registries?.find((r) => r.habitId === h.id)
           ? registries.find((r) => r.habitId === h.id)!.value
           : 0,
       });
@@ -71,6 +95,19 @@ export class TodayHabitsComponent implements OnInit {
     };
   }
 
+  updateRegistryData() {
+    const registries =
+      this._dashboardStore.habitRegistries?.filter((r) =>
+        isSameDay(new Date(r.date), this.selectedDate)
+      ) ?? [];
+    const mood = this._dashboardStore.moodRegistries?.find((m) =>
+      isSameDay(new Date(m.date), this.selectedDate)
+    );
+    this.alreadyCreated = !!(registries.length || mood);
+    this.initializeHabitRegistryMap(registries);
+    this.initializeMoodRegistry(mood);
+  }
+
   setupSubscriptions() {
     this._dashboardStore.habits$.subscribe({
       next: (res) => {
@@ -81,15 +118,23 @@ export class TodayHabitsComponent implements OnInit {
     this._dashboardStore.habitsRegistries$.subscribe({
       next: (res) => {
         const registries =
-          res?.filter((r) => isSameDay(new Date(r.date), new Date())) ?? [];
+          res?.filter((r) => isSameDay(new Date(r.date), this.selectedDate)) ??
+          [];
         this.initializeHabitRegistryMap(registries);
       },
     });
     this._dashboardStore.moodRegistries$.subscribe({
       next: (res) => {
-        const mood = res?.find((m) => isSameDay(new Date(m.date), new Date()));
+        const mood = res?.find((m) =>
+          isSameDay(new Date(m.date), this.selectedDate)
+        );
         this.initializeMoodRegistry(mood);
       },
     });
+  }
+
+  addDaysToSelectedDate(nDays: number) {
+    this.selectedDate = addDays(this.selectedDate, nDays);
+    this.updateRegistryData();
   }
 }
