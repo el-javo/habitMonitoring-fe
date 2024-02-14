@@ -1,0 +1,17 @@
+<div class="global-cont">
+  @if (habits?.length) { @for (habit of habits; track $index) {
+  <div class="habit">
+    <input type="text" pInputText [(ngModel)]="habit.name" />
+    <p-dropdown
+      [options]="[
+        { label: 'value', value: false },
+        { label: 'on/off', value: true }
+      ]"
+      [optionLabel]="'label'"
+      [optionValue]="'value'"
+      [(ngModel)]="habit.isBoolean"
+    ></p-dropdown>
+  </div>
+  } }
+  <p-button label="+"></p-button>
+</div>

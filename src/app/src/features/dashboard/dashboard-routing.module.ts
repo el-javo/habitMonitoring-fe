@@ -31,6 +31,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'habits',
+        loadChildren: () =>
+          import('@features/dashboard/views/habits/habits.module').then(
+            (m) => m.HabitsModule
+          ),
+      },
+      {
         path: '**',
         redirectTo: 'dashboard',
       },
