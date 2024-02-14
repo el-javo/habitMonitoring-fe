@@ -87,3 +87,44 @@ export const chartConfig: ChartOptions = {
     },
   },
 };
+
+export const primeChartConfig = {
+  type: 'line',
+  tension: 0.5,
+  pointRadius: 0,
+};
+export const primeBoilerData = {
+  labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+  datasets: [
+    {
+      label: 'Valor',
+      data: [undefined, 0.2, 0.3, 0.5],
+      fill: true,
+      backgroundColor: '#0000ff11',
+      borderWidth: 1,
+      borderColor: '#0000ff',
+      tension: 0.5,
+      pointRadius: 0,
+    },
+    {
+      label: 'Max',
+      data: [undefined, 1, 1, 1].reverse(),
+      fill: false,
+      backgroundColor: '#00ff0011',
+      borderWidth: 1,
+      borderColor: '#00ff00',
+      tension: 0.5,
+      pointRadius: 0,
+    },
+    {
+      label: 'Mood',
+      data: [undefined, 0.5, 0.5, 0.5].reverse(),
+      fill: false,
+      backgroundColor: '#f786a011',
+      borderWidth: 1,
+      borderColor: '#f786a0',
+      tension: 0.5,
+      pointRadius: 0,
+    },
+  ],
+};

@@ -8,6 +8,7 @@ import { FormsModule } from '@angular/forms';
 import { PanelModule } from 'primeng/panel';
 import { SliderModule } from 'primeng/slider';
 import { InputSwitchModule } from 'primeng/inputswitch';
+import { ChartModule } from 'primeng/chart';
 
 @NgModule({
   declarations: [],
@@ -20,6 +21,7 @@ import { InputSwitchModule } from 'primeng/inputswitch';
     PanelModule,
     SliderModule,
     InputSwitchModule,
+    ChartModule,
   ],
   exports: [
     ButtonModule,
@@ -29,6 +31,7 @@ import { InputSwitchModule } from 'primeng/inputswitch';
     PanelModule,
     SliderModule,
     InputSwitchModule,
+    ChartModule,
   ],
 })
 export class PrimengModule {}

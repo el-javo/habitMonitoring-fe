@@ -3,7 +3,7 @@ import { DashboardStore } from '@features/dashboard/dashboard.store';
 import { ChartOptions } from '@shared/apex-charts/apex.interfaces';
 import { IHabit, IHabitRegistry } from '@shared/interfaces/habit.interface';
 import { IMoodRegistry } from '@shared/interfaces/mood.interface';
-import { chartConfig } from './config/chart.config';
+import { chartConfig, primeBoilerData } from './config/chart.config';
 import { format } from 'date-fns';
 import { getDay } from 'date-fns';
 import { ChartComponent } from 'ng-apexcharts';
@@ -24,8 +24,9 @@ export class MainGraphComponent implements OnInit {
     { habits: IHabitRegistry[]; mood?: IMoodRegistry }
   > = new Map<string, { habits: IHabitRegistry[]; mood?: IMoodRegistry }>();
   chartOptions: ChartOptions = chartConfig;
+  primeData = primeBoilerData;
   @ViewChild('apexChart') apexChart!: ChartComponent;
-
+  showChart = true;
   constructor(private _dashboardStore: DashboardStore) {}
 
   ngOnInit(): void {
@@ -36,7 +37,8 @@ export class MainGraphComponent implements OnInit {
     if (this.wait) return;
     //refill the DataMap
     this.refillDataMap();
-    this.updateBasicChartSeries();
+    // this.updateBasicChartSeries();
+    this.updatePrimeBasicChart();
   }
 
   updateBasicChartSeries() {
@@ -67,6 +69,43 @@ export class MainGraphComponent implements OnInit {
     this.chartOptions.series![1].data = newMaxSeries;
     // this.chartOptions.series![2].data = newMoodSeries; //TODO include mood
     this.apexChart.updateSeries(this.chartOptions.series!, true);
+  }
+
+  updatePrimeBasicChart() {
+    const data = [...this.dataRegistriesMap.keys()].map((date) => {
+      const register = this.dataRegistriesMap.get(date);
+      const habitValue = register?.habits.reduce(
+        (acc, curr) =>
+          acc + curr.value * this.habitsMap.get(curr.habitId)?.weight!,
+        0
+      ); //sum total habits
+      const habitMax = this.habits.reduce((acc, curr) => {
+        if (curr.weekDays.includes(((getDay(new Date(date)) + 6) % 7) + 1)) {
+          //sorry for this but i work w [1-7] 1 = monday and datefns [0-6]  0 = sunday
+          return acc + curr.weight;
+        }
+        return acc;
+      }, 0);
+      const moodValue = register?.mood?.value;
+
+      return { habitValue, habitMax, moodValue, date };
+    });
+    const habitData = data.map((d) => d.habitValue);
+    const maxHabitData = data.map((d) => d.habitMax);
+    const moodData = data.map((d) => d.moodValue);
+    const labels = data.map((d) => d.date);
+    this.primeData.labels = labels;
+    this.primeData.datasets[0].data = habitData;
+    this.primeData.datasets[1].data = maxHabitData;
+    this.primeData.datasets[2].data = moodData;
+    this.refreshPChart();
+  }
+
+  refreshPChart() {
+    this.showChart = false;
+    setTimeout(() => {
+      this.showChart = true;
+    });
   }
 
   refillDataMap() {

@@ -1,6 +1,6 @@
 <h2>Main Graph</h2>
 <p>Total Habit Registries: {{ habitRegistries?.length || "sin registros" }}</p>
-<apx-chart
+<!-- <apx-chart
   #apexChart
   [series]="chartOptions.series!"
   [chart]="chartOptions.chart!"
@@ -12,4 +12,11 @@
   [xaxis]="chartOptions.xaxis!"
   [stroke]="chartOptions.stroke!"
   [yaxis]="chartOptions.yaxis!"
-></apx-chart>
+></apx-chart> -->
+<p-chart
+  *ngIf="showChart"
+  [data]="primeData"
+  [type]="'line'"
+  width="100vw"
+  height="500px"
+></p-chart>
