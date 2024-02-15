@@ -1,17 +1,37 @@
 <div class="global-cont">
   @if (habits?.length) { @for (habit of habits; track $index) {
   <div class="habit">
-    <input type="text" pInputText [(ngModel)]="habit.name" />
+    <input
+      type="text"
+      pInputText
+      [placeholder]="'name'"
+      [(ngModel)]="habit.name"
+    />
+    <input
+      type="number"
+      pInputText
+      [placeholder]="'weight'"
+      [(ngModel)]="habit.weight"
+    />
     <p-dropdown
-      [options]="[
-        { label: 'value', value: false },
-        { label: 'on/off', value: true }
-      ]"
+      [placeholder]="'type'"
+      [options]="typeOptions"
       [optionLabel]="'label'"
       [optionValue]="'value'"
       [(ngModel)]="habit.isBoolean"
     ></p-dropdown>
+    <p-multiSelect
+      [placeholder]="'weekDays'"
+      [showHeader]="false"
+      display="chip"
+      [options]="weekDayOptions"
+      [optionLabel]="'label'"
+      [optionValue]="'value'"
+      [(ngModel)]="habit.weekDays"
+    ></p-multiSelect>
+    <div class="boton" (click)="removeHabit($index)">-</div>
   </div>
   } }
-  <p-button label="+"></p-button>
+  <div class="boton" (click)="addHabit()">+</div>
+  <p-button label="save" (onClick)="saveHabits()"></p-button>
 </div>

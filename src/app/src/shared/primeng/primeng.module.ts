@@ -5,6 +5,7 @@ import { CalendarModule } from 'primeng/calendar';
 import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
+import { MultiSelectModule } from 'primeng/multiselect';
 import { FormsModule } from '@angular/forms';
 import { PanelModule } from 'primeng/panel';
 import { SliderModule } from 'primeng/slider';
@@ -20,6 +21,7 @@ import { ChartModule } from 'primeng/chart';
     InputTextModule,
     FormsModule,
     PanelModule,
+    MultiSelectModule,
     SliderModule,
     InputSwitchModule,
     ChartModule,
@@ -29,6 +31,7 @@ import { ChartModule } from 'primeng/chart';
     ButtonModule,
     DropdownModule,
     InputTextModule,
+    MultiSelectModule,
     FormsModule,
     PanelModule,
     SliderModule,

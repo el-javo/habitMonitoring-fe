@@ -8,6 +8,7 @@ export interface IHabit {
   weekDays: number[];
 }
 export interface IHabitBody {
+  id?: number;
   name: string;
   isBoolean: Boolean;
   weight: number;
