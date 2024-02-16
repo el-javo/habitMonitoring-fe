@@ -92,6 +92,11 @@ export const primeChartConfig = {
   type: 'line',
   tension: 0.5,
   pointRadius: 0,
+  scales: {
+    y: {
+      beginAtZero: true,
+    },
+  },
 };
 export const primeBoilerData = {
   labels: ['Q1', 'Q2', 'Q3', 'Q4'],

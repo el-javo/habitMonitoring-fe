@@ -35,18 +35,20 @@ export class TodayHabitsComponent implements OnInit {
     this.setupSubscriptions();
   }
   createOrUpdateRegistry() {
-    if (this.alreadyCreated) this.createHabitRegistry();
+    if (!this.alreadyCreated) this.createHabitRegistry();
     else this.updateHabitRegistry();
   }
 
+  //! For now you cannot update
   updateHabitRegistry() {
     [...this.habitRegistryMap.values()]
       .map((hr) => {
         return { ...hr, value: Number(hr.value) };
       })
       .forEach((hr) => {
+        const { habitId, ...body } = hr;
         this._habitRegistryService
-          .updateHabitRegistry(String(hr.habitId), hr)
+          .updateHabitRegistry(String(habitId), body)
           .subscribe({
             next: (res) => {
               this.alreadyCreated = true;
@@ -61,14 +63,20 @@ export class TodayHabitsComponent implements OnInit {
       })
       .forEach((hr) => {
         this._habitRegistryService.createHabitRegistry(hr).subscribe({
-          next: (res) => {
+          next: ({ result: habitR }) => {
             this.alreadyCreated = true;
+            const hregs = this._dashboardStore.habitRegistries;
+            hregs?.push(habitR);
+            this._dashboardStore.habitRegistries = hregs;
           },
         });
       });
     this._moodRegistryService.createMoodRegistry(this.moodRegistry).subscribe({
-      next: (res) => {
+      next: ({ result: moodR }) => {
         this.alreadyCreated = true;
+        const moodRegs = this._dashboardStore.moodRegistries;
+        moodRegs?.push(moodR);
+        this._dashboardStore.moodRegistries = moodRegs;
       },
     });
   }
@@ -78,7 +86,7 @@ export class TodayHabitsComponent implements OnInit {
     this.habits.forEach((h) => {
       this.habitRegistryMap.set(h.id, {
         habitId: h.id,
-        date: format(new Date(), 'MM-dd-yyyy'),
+        date: format(this.selectedDate, 'MM-dd-yyyy'),
         value: registries?.find((r) => r.habitId === h.id)
           ? registries.find((r) => r.habitId === h.id)!.value
           : 0,
@@ -88,11 +96,19 @@ export class TodayHabitsComponent implements OnInit {
 
   initializeMoodRegistry(mood?: IMoodRegistry) {
     this.moodRegistry = {
-      date: format(new Date(), 'MM-dd-yyyy'),
+      date: format(this.selectedDate, 'MM-dd-yyyy'),
       value: mood ? mood.value : 0,
       observations: mood ? mood.observations : '',
       userId: this._dashboardStore.selectedUser?.id!,
     };
+  }
+
+  initializeTodayHabits(habits: IHabit[]) {
+    const dayNumber = this.selectedDate.getDay();
+    const transformedDayNumber = dayNumber === 0 ? 7 : dayNumber;
+    this.habits = habits.filter((h) =>
+      h.weekDays.includes(transformedDayNumber)
+    );
   }
 
   updateRegistryData() {
@@ -111,7 +127,7 @@ export class TodayHabitsComponent implements OnInit {
   setupSubscriptions() {
     this._dashboardStore.habits$.subscribe({
       next: (res) => {
-        this.habits = res as IHabit[];
+        this.initializeTodayHabits(res || []);
         this.initializeHabitRegistryMap();
       },
     });
@@ -120,6 +136,7 @@ export class TodayHabitsComponent implements OnInit {
         const registries =
           res?.filter((r) => isSameDay(new Date(r.date), this.selectedDate)) ??
           [];
+        this.alreadyCreated = !!registries.length;
         this.initializeHabitRegistryMap(registries);
       },
     });
@@ -135,6 +152,7 @@ export class TodayHabitsComponent implements OnInit {
 
   addDaysToSelectedDate(nDays: number) {
     this.selectedDate = addDays(this.selectedDate, nDays);
+    this.initializeTodayHabits(this._dashboardStore.habits || []);
     this.updateRegistryData();
   }
 }

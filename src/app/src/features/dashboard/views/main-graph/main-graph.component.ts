@@ -3,7 +3,11 @@ import { DashboardStore } from '@features/dashboard/dashboard.store';
 import { ChartOptions } from '@shared/apex-charts/apex.interfaces';
 import { IHabit, IHabitRegistry } from '@shared/interfaces/habit.interface';
 import { IMoodRegistry } from '@shared/interfaces/mood.interface';
-import { chartConfig, primeBoilerData } from './config/chart.config';
+import {
+  chartConfig,
+  primeBoilerData,
+  primeChartConfig,
+} from './config/chart.config';
 import { format } from 'date-fns';
 import { getDay } from 'date-fns';
 import { ChartComponent } from 'ng-apexcharts';
@@ -27,10 +31,12 @@ export class MainGraphComponent implements OnInit {
   primeData = primeBoilerData;
   @ViewChild('apexChart') apexChart!: ChartComponent;
   showChart = true;
+  primeChartConfig = primeChartConfig;
   constructor(private _dashboardStore: DashboardStore) {}
 
   ngOnInit(): void {
     this.setupSubscribers();
+    this.updateCharts();
   }
 
   updateCharts() {
@@ -72,24 +78,28 @@ export class MainGraphComponent implements OnInit {
   }
 
   updatePrimeBasicChart() {
-    const data = [...this.dataRegistriesMap.keys()].map((date) => {
-      const register = this.dataRegistriesMap.get(date);
-      const habitValue = register?.habits.reduce(
-        (acc, curr) =>
-          acc + curr.value * this.habitsMap.get(curr.habitId)?.weight!,
-        0
-      ); //sum total habits
-      const habitMax = this.habits.reduce((acc, curr) => {
-        if (curr.weekDays.includes(((getDay(new Date(date)) + 6) % 7) + 1)) {
-          //sorry for this but i work w [1-7] 1 = monday and datefns [0-6]  0 = sunday
-          return acc + curr.weight;
-        }
-        return acc;
-      }, 0);
-      const moodValue = register?.mood?.value;
+    const data = [...this.dataRegistriesMap.keys()]
+      .sort((a: any, b: any) => {
+        return new Date(a).getTime() - new Date(b).getTime();
+      })
+      .map((date) => {
+        const register = this.dataRegistriesMap.get(date);
+        const habitValue = register?.habits.reduce(
+          (acc, curr) =>
+            acc + curr.value * this.habitsMap.get(curr.habitId)?.weight!,
+          0
+        ); //sum total habits
+        const habitMax = this.habits.reduce((acc, curr) => {
+          if (curr.weekDays.includes(((getDay(new Date(date)) + 6) % 7) + 1)) {
+            //sorry for this but i work w [1-7] 1 = monday and datefns [0-6]  0 = sunday
+            return acc + curr.weight;
+          }
+          return acc;
+        }, 0);
+        const moodValue = register?.mood?.value;
 
-      return { habitValue, habitMax, moodValue, date };
-    });
+        return { habitValue, habitMax, moodValue, date };
+      });
     const habitData = data.map((d) => d.habitValue);
     const maxHabitData = data.map((d) => d.habitMax);
     const moodData = data.map((d) => d.moodValue);
@@ -145,6 +155,7 @@ export class MainGraphComponent implements OnInit {
       next: (res) => {
         this.wait = !this.wait;
         this.moodRegistries = res as IMoodRegistry[];
+        this.updateCharts();
       },
     });
     this._dashboardStore.habits$.subscribe({
