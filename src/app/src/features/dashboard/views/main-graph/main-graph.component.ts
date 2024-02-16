@@ -32,6 +32,8 @@ export class MainGraphComponent implements OnInit {
   @ViewChild('apexChart') apexChart!: ChartComponent;
   showChart = true;
   primeChartConfig = primeChartConfig;
+  normalizeSelected = false;
+
   constructor(private _dashboardStore: DashboardStore) {}
 
   ngOnInit(): void {
@@ -104,9 +106,17 @@ export class MainGraphComponent implements OnInit {
     const maxHabitData = data.map((d) => d.habitMax);
     const moodData = data.map((d) => d.moodValue);
     const labels = data.map((d) => d.date);
+    const normalizedData = habitData.map((d, index) => {
+      return d ? d / maxHabitData[index] : undefined;
+    });
+    const normalizedMaxHabit = maxHabitData.map((e) => 1);
     this.primeData.labels = labels;
-    this.primeData.datasets[0].data = habitData;
-    this.primeData.datasets[1].data = maxHabitData;
+    this.primeData.datasets[0].data = this.normalizeSelected
+      ? normalizedData
+      : habitData;
+    this.primeData.datasets[1].data = this.normalizeSelected
+      ? normalizedMaxHabit
+      : maxHabitData;
     this.primeData.datasets[2].data = moodData;
     this.refreshPChart();
   }

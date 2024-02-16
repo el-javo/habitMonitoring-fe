@@ -1,5 +1,12 @@
 <h2>Main Graph</h2>
 <p>Total Habit Registries: {{ habitRegistries?.length || "sin registros" }}</p>
+<div>
+  Normalizado
+  <p-inputSwitch
+    [(ngModel)]="normalizeSelected"
+    (onChange)="updatePrimeBasicChart()"
+  ></p-inputSwitch>
+</div>
 <!-- <apx-chart
   #apexChart
   [series]="chartOptions.series!"
