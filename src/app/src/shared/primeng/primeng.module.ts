@@ -11,6 +11,7 @@ import { PanelModule } from 'primeng/panel';
 import { SliderModule } from 'primeng/slider';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { ChartModule } from 'primeng/chart';
+import { SelectButtonModule } from 'primeng/selectbutton';
 
 @NgModule({
   declarations: [],
@@ -18,6 +19,7 @@ import { ChartModule } from 'primeng/chart';
     CommonModule,
     ButtonModule,
     DropdownModule,
+    SelectButtonModule,
     InputTextModule,
     FormsModule,
     PanelModule,
@@ -31,6 +33,7 @@ import { ChartModule } from 'primeng/chart';
     ButtonModule,
     DropdownModule,
     InputTextModule,
+    SelectButtonModule,
     MultiSelectModule,
     FormsModule,
     PanelModule,

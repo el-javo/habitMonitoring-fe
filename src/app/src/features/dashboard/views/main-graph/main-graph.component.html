@@ -7,19 +7,24 @@
     (onChange)="updatePrimeBasicChart()"
   ></p-inputSwitch>
 </div>
-<!-- <apx-chart
-  #apexChart
-  [series]="chartOptions.series!"
-  [chart]="chartOptions.chart!"
-  [dataLabels]="chartOptions.dataLabels!"
-  [markers]="chartOptions.markers!"
-  [title]="chartOptions.title!"
-  [tooltip]="chartOptions.tooltip!"
-  [theme]="chartOptions.theme!"
-  [xaxis]="chartOptions.xaxis!"
-  [stroke]="chartOptions.stroke!"
-  [yaxis]="chartOptions.yaxis!"
-></apx-chart> -->
+<div>
+  Visualizacion
+  <p-selectButton
+    [options]="visualizationOptions"
+    [(ngModel)]="visualizationWeekly"
+    optionLabel="label"
+    optionValue="value"
+    (onChange)="refillDataMap(); updatePrimeBasicChart()"
+  ></p-selectButton>
+</div>
+<div>
+  habitos
+  <p-multiSelect
+    [options]="optionHabits"
+    [(ngModel)]="selectedHabits"
+    (onChange)="updatePrimeBasicChart()"
+  ></p-multiSelect>
+</div>
 <p-chart
   *ngIf="showChart"
   [data]="primeData"

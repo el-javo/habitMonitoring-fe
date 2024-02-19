@@ -8,7 +8,7 @@ import {
   primeBoilerData,
   primeChartConfig,
 } from './config/chart.config';
-import { format } from 'date-fns';
+import { addDays, format, getWeek } from 'date-fns';
 import { getDay } from 'date-fns';
 import { ChartComponent } from 'ng-apexcharts';
 
@@ -33,10 +33,18 @@ export class MainGraphComponent implements OnInit {
   showChart = true;
   primeChartConfig = primeChartConfig;
   normalizeSelected = false;
+  visualizationWeekly = false;
+  visualizationOptions = [
+    { label: 'Weekly', value: true },
+    { label: 'Dialy', value: false },
+  ];
+  optionHabits: { label: string; value: number }[] = [];
+  selectedHabits: number[] = [];
 
   constructor(private _dashboardStore: DashboardStore) {}
 
   ngOnInit(): void {
+    this.buildView();
     this.setupSubscribers();
     this.updateCharts();
   }
@@ -45,59 +53,33 @@ export class MainGraphComponent implements OnInit {
     if (this.wait) return;
     //refill the DataMap
     this.refillDataMap();
-    // this.updateBasicChartSeries();
     this.updatePrimeBasicChart();
-  }
-
-  updateBasicChartSeries() {
-    const series = [...this.dataRegistriesMap.keys()].map((date) => {
-      const register = this.dataRegistriesMap.get(date);
-      const habitValue = register?.habits.reduce(
-        (acc, curr) =>
-          acc + curr.value * this.habitsMap.get(curr.habitId)?.weight!,
-        0
-      ); //sum total habits
-      const habitMax = this.habits.reduce((acc, curr) => {
-        if (curr.weekDays.includes(((getDay(new Date(date)) + 6) % 7) + 1)) {
-          //sorry for this but i work w [1-7] 1 = monday and datefns [0-6]  0 = sunday
-          return acc + curr.weight;
-        }
-        return acc;
-      }, 0);
-      const moodValue = register?.mood?.value;
-      const habitRegData = { x: date, y: habitValue };
-      const maxRegData = { x: date, y: habitMax };
-      const moodRegData = { x: date, y: moodValue };
-      return { habitRegData, moodRegData, maxRegData };
-    });
-    const newHabitSeries = series.map((s) => s.habitRegData);
-    const newMaxSeries = series.map((s) => s.maxRegData);
-    const newMoodSeries = series.map((s) => s.moodRegData);
-    this.chartOptions.series![0].data = newHabitSeries;
-    this.chartOptions.series![1].data = newMaxSeries;
-    // this.chartOptions.series![2].data = newMoodSeries; //TODO include mood
-    this.apexChart.updateSeries(this.chartOptions.series!, true);
   }
 
   updatePrimeBasicChart() {
     const data = [...this.dataRegistriesMap.keys()]
       .sort((a: any, b: any) => {
-        return new Date(a).getTime() - new Date(b).getTime();
+        return this.visualizationWeekly
+          ? Number(a) - Number(b)
+          : new Date(a).getTime() - new Date(b).getTime();
       })
       .map((date) => {
         const register = this.dataRegistriesMap.get(date);
         const habitValue = register?.habits.reduce(
           (acc, curr) =>
-            acc + curr.value * this.habitsMap.get(curr.habitId)?.weight!,
+            acc +
+            (this.selectedHabits.includes(curr.habitId)
+              ? curr.value * this.habitsMap.get(curr.habitId)?.weight!
+              : 0),
           0
         ); //sum total habits
-        const habitMax = this.habits.reduce((acc, curr) => {
-          if (curr.weekDays.includes(((getDay(new Date(date)) + 6) % 7) + 1)) {
-            //sorry for this but i work w [1-7] 1 = monday and datefns [0-6]  0 = sunday
-            return acc + curr.weight;
-          }
-          return acc;
-        }, 0);
+        const weekIterator = this.visualizationWeekly
+          ? [...Array(6).keys()].map((i) => addDays(new Date(), i))
+          : [new Date(date)];
+        const habitMax = weekIterator.reduce(
+          (prev, val) => prev + this.computeMaxValueForDate(val),
+          0
+        );
         const moodValue = register?.mood?.value;
 
         return { habitValue, habitMax, moodValue, date };
@@ -107,7 +89,11 @@ export class MainGraphComponent implements OnInit {
     const moodData = data.map((d) => d.moodValue);
     const labels = data.map((d) => d.date);
     const normalizedData = habitData.map((d, index) => {
-      return d ? d / maxHabitData[index] : undefined;
+      return maxHabitData[index] !== undefined && maxHabitData[index] !== 0
+        ? (d ?? 0) / maxHabitData[index]
+        : d
+        ? 1
+        : 0;
     });
     const normalizedMaxHabit = maxHabitData.map((e) => 1);
     this.primeData.labels = labels;
@@ -121,6 +107,19 @@ export class MainGraphComponent implements OnInit {
     this.refreshPChart();
   }
 
+  computeMaxValueForDate(date: Date): number {
+    return this.habits.reduce((acc, curr) => {
+      if (
+        curr.weekDays.includes(((getDay(date) + 6) % 7) + 1) &&
+        this.selectedHabits.includes(curr.id)
+      ) {
+        //sorry for this but i work w [1-7] 1 = monday and datefns [0-6]  0 = sunday
+        return acc + curr.weight;
+      }
+      return acc;
+    }, 0);
+  }
+
   refreshPChart() {
     this.showChart = false;
     setTimeout(() => {
@@ -129,10 +128,17 @@ export class MainGraphComponent implements OnInit {
   }
 
   refillDataMap() {
+    const formatDate = this.visualizationWeekly
+      ? (d: Date) => {
+          return String(getWeek(d));
+        }
+      : (d: Date) => {
+          return format(d, 'MM-dd-yyyy');
+        };
     this.dataRegistriesMap.clear();
     this.habitRegistries.forEach((hr) => {
       const hrDate = new Date(hr.date);
-      const stringDate = format(hrDate, 'MM-dd-yyyy');
+      const stringDate = formatDate(hrDate);
       const dateReg = this.dataRegistriesMap.get(stringDate);
       if (!dateReg) {
         this.dataRegistriesMap.set(stringDate, { habits: [hr] });
@@ -143,7 +149,7 @@ export class MainGraphComponent implements OnInit {
     });
     this.moodRegistries.forEach((mr) => {
       const mrDate = new Date(mr.date);
-      const stringDate = format(mrDate, 'MM-dd-yyyy');
+      const stringDate = formatDate(mrDate);
       const dateReg = this.dataRegistriesMap.get(stringDate);
       if (!dateReg) {
         this.dataRegistriesMap.set(stringDate, { habits: [], mood: mr });
@@ -153,28 +159,53 @@ export class MainGraphComponent implements OnInit {
     });
   }
 
+  buildView() {
+    if (this._dashboardStore.habits)
+      this.fillHabits(this._dashboardStore.habits!);
+    if (this._dashboardStore.habitRegistries)
+      this.fillHabitRegistries(this._dashboardStore.habitRegistries);
+    if (this._dashboardStore.moodRegistries)
+      this.fillMoodRegistries(this._dashboardStore.moodRegistries);
+  }
+
+  fillHabits(habits: IHabit[]) {
+    this.habits = habits as IHabit[];
+    this.habitsMap.clear();
+    this.habits.forEach((h) => {
+      this.habitsMap.set(h.id, h);
+    });
+    this.optionHabits = this.habits.map((h) => {
+      return { label: h.name, value: h.id };
+    });
+    this.selectedHabits = this.habits.map((h) => h.id);
+  }
+
+  fillMoodRegistries(moodRegs: IMoodRegistry[]) {
+    this.wait = !this.wait;
+    this.moodRegistries = moodRegs as IMoodRegistry[];
+    this.updateCharts();
+  }
+
+  fillHabitRegistries(habitRegs: IHabitRegistry[]) {
+    this.habitRegistries = habitRegs as IHabitRegistry[];
+    this.wait = !this.wait;
+    this.updateCharts();
+  }
+
   setupSubscribers() {
     this._dashboardStore.habitsRegistries$.subscribe({
       next: (res) => {
-        this.habitRegistries = res as IHabitRegistry[];
-        this.wait = !this.wait;
-        this.updateCharts();
+        if (res) this.fillHabitRegistries(res);
       },
     });
     this._dashboardStore.moodRegistries$.subscribe({
       next: (res) => {
-        this.wait = !this.wait;
-        this.moodRegistries = res as IMoodRegistry[];
-        this.updateCharts();
+        if (res) this.fillMoodRegistries(res);
       },
     });
     this._dashboardStore.habits$.subscribe({
       next: (res) => {
-        this.habits = res as IHabit[];
-        this.habitsMap.clear();
-        this.habits.forEach((h) => {
-          this.habitsMap.set(h.id, h);
-        });
+        if (res) this.fillHabits(res);
       },
     });
   }
